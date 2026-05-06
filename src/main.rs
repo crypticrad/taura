@@ -37,7 +37,7 @@ fn main() {
             [] => continue,
             ["exit"] => break,
             ["echo", args @ ..] => println!("{}", args.join(" ")),
-            ["type", args @ ("exit" | "type" | "echo")] => println!("{} is a shell builtin", args),
+            ["type", args @ ("exit" | "type" | "echo" | "pwd" | "cd")] => println!("{} is a shell builtin", args),
             ["type", args @ ..] => {
                 let cmd = args.join(" ");
                 match find_executable(&cmd) {
@@ -45,7 +45,25 @@ fn main() {
                     None => println!("{}: not found", cmd),
                 }
             },
-            [cmd, args @ ..] => { 
+            ["pwd"] => {
+                if let Ok(path) = std::env::current_dir() {
+                    println!("{}", path.to_str().unwrap())
+                }
+            },
+            ["cd", _args @ "~"] => {
+                if let Some(path) = std::env::home_dir() {
+                    std::env::set_current_dir(path).expect("failed to change to home directory");
+                }
+            }
+            ["cd", args @ ..] => {
+                let path = args[0];
+                if let Ok(true) = fs::exists(path) {
+                    std::env::set_current_dir(path).expect("failed to change current working directory");
+                } else {
+                    println!("cd: {path}: No such file or directory");
+                }
+            }
+            [cmd, args @ ..] => {
                 match find_executable(&cmd) {
                     Some(path) => { Command::new(&path).arg0(cmd).args(args).status().unwrap(); },
                     None => println!("{}: command not found", cmd)
