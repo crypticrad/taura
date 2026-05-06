@@ -42,19 +42,12 @@ jobs:
           - os: macos-latest
             artifact: taura-darwin-x86_64
             binary: target/release/taura
-          - os: windows-latest
-            artifact: taura-windows-x86_64.exe
-            binary: target/release/taura.exe
     steps:
       - uses: actions/checkout@v4
       - name: Build release binary
         run: cargo build --release
-      - name: Rename binary (Unix)
-        if: runner.os != 'Windows'
+      - name: Rename binary
         run: cp ${{ matrix.binary }} ${{ matrix.artifact }}
-      - name: Rename binary (Windows)
-        if: runner.os == 'Windows'
-        run: copy ${{ matrix.binary }} ${{ matrix.artifact }}
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
