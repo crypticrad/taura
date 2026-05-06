@@ -1,0 +1,7 @@
+[package]
+name = "taura"
+version = "0.1.0"
+authors = ["crypt"]
+edition = "2024"
+
+[dependencies]
